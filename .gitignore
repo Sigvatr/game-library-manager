@@ -1,1 +1,8 @@
+# Visual Code
 .vscode
+
+# Settings file
+settings.json
+
+# cache directory
+.cache
