@@ -4,7 +4,18 @@ import requests
 import hashlib
 import time
 import csv
+import functools
 
+
+def compose(*functions):
+    return functools.reduce(lambda f, g: lambda x: f(g(x)), functions, lambda x: x)
+
+def trace(label):
+    def internal(value):
+        print(f'{label}: {value}')
+        return value
+
+    return internal
 
 def read_json_file(file_path: str) -> dict:
     with open(file_path) as json_file:
@@ -42,32 +53,35 @@ def pass_and_save_response(url: str, cache_file: str) -> str:
     save_cache(cache_file, result)
     return result
 
-def to_cache_file(cache_name: str):
+def to_cache_file(cache_name: str) -> str:
     return f'.cache/{cache_name}.json'
 
 def get_data(url: str) -> str:
     cache_file = to_cache_file(to_md5(url))
     return read_cache_file(cache_file) if cache_exist_and_is_fresh(cache_file) else pass_and_save_response(url, cache_file)
 
-def api_get_own_games(steam_api_key: str):
-    return lambda steam_user_id: f'http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key={steam_api_key}&steamid={steam_user_id}&format=json&include_appinfo=true'
+def api_get_own_games(steam_settings: str) -> str:
+    steam_api_key = steam_settings['api_key']
+    steam_user_id = steam_settings['user_id']
 
-def get_only_games_data(steam_games):
+    return f'http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key={steam_api_key}&steamid={steam_user_id}&format=json&include_appinfo=true'
+
+def get_only_games_data(steam_games: dict) -> [dict]:
     return steam_games['response']['games']
 
 def is_game(game: dict) -> bool:
     return game['img_icon_url']
 
 def only_games(games: []) -> []:
-    return filter(only_games, games)
+    return filter(is_game, games)
 
+get_games_from_steam = compose(only_games, get_only_games_data, get_data, api_get_own_games)
 
 settings = load_configuration_file('settings.json')
-games = filter(only_games, get_only_games_data(get_data(api_get_own_games(settings['steam']['api_key'])(settings['steam']['user_id']))))
 
 with open('steam_library.csv', 'w', newline='') as csvfile:
     steam_game_keys = ['appid', 'name', 'img_icon_url', 'img_logo_url', 'playtime_forever', 'playtime_mac_forever', 'playtime_linux_forever', 'playtime_2weeks', 'has_community_visible_stats', 'playtime_windows_forever']
     writer = csv.DictWriter(csvfile, fieldnames=steam_game_keys)
     writer.writeheader()
-    writer.writerows(games)
+    writer.writerows(get_games_from_steam(settings['steam']))
     csvfile.close()
