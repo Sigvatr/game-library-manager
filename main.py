@@ -55,6 +55,19 @@ def api_get_own_games(steam_api_key: str):
 def get_only_games_data(steam_games):
     return steam_games['response']['games']
 
+def is_game(game: dict) -> bool:
+    return game['img_icon_url']
+
+def only_games(games: []) -> []:
+    return filter(only_games, games)
+
+
 settings = load_configuration_file('settings.json')
-games = get_only_games_data(get_data(api_get_own_games(settings['steam']['api_key'])(settings['steam']['user_id'])))
-print(games[0])
+games = filter(only_games, get_only_games_data(get_data(api_get_own_games(settings['steam']['api_key'])(settings['steam']['user_id']))))
+
+with open('steam_library.csv', 'w', newline='') as csvfile:
+    steam_game_keys = ['appid', 'name', 'img_icon_url', 'img_logo_url', 'playtime_forever', 'playtime_mac_forever', 'playtime_linux_forever', 'playtime_2weeks', 'has_community_visible_stats', 'playtime_windows_forever']
+    writer = csv.DictWriter(csvfile, fieldnames=steam_game_keys)
+    writer.writeheader()
+    writer.writerows(games)
+    csvfile.close()
