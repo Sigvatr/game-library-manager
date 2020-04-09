@@ -8,7 +8,7 @@ import functools
 
 
 def compose(*functions):
-    return functools.reduce(lambda f, g: lambda x: f(g(x)), functions, lambda x: x)
+    return functools.reduce(lambda f, g: lambda x: f(g(x)), functions)
 
 def trace(label):
     def internal(value):
@@ -16,6 +16,14 @@ def trace(label):
         return value
 
     return internal
+
+def get_all_keys(collection: list) -> list:
+
+    def internal(prev, current):
+        prev.update(current.keys())
+        return prev
+
+    return functools.reduce(internal, collection, set())
 
 def read_json_file(file_path: str) -> dict:
     with open(file_path) as json_file:
@@ -75,12 +83,22 @@ def is_game(game: dict) -> bool:
 def only_games(games: []) -> []:
     return filter(is_game, games)
 
-get_games_from_steam = compose(only_games, get_only_games_data, get_data, api_get_own_games)
+def compact_steam_game_data(game: dict) -> dict:
+    return {
+        'DRM': 'Steam',
+        'appid': game.get('appid', None),
+        'name': game.get('name', None),
+        'play_time': game.get('playtime_forever', 0)
+    }
+
+def compact_steam_games_data(games: list) -> list:
+    return map(compact_steam_game_data, games)
+
+get_games_from_steam = compose(compact_steam_games_data, only_games, get_only_games_data, get_data, api_get_own_games)
 
 settings = load_configuration_file('settings.json')
-
 with open('steam_library.csv', 'w', newline='') as csvfile:
-    steam_game_keys = ['appid', 'name', 'img_icon_url', 'img_logo_url', 'playtime_forever', 'playtime_mac_forever', 'playtime_linux_forever', 'playtime_2weeks', 'has_community_visible_stats', 'playtime_windows_forever']
+    steam_game_keys = ['DRM', 'appid', 'name', 'play_time']
     writer = csv.DictWriter(csvfile, fieldnames=steam_game_keys)
     writer.writeheader()
     writer.writerows(get_games_from_steam(settings['steam']))
