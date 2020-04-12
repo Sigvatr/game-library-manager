@@ -97,7 +97,7 @@ def compact_steam_games_data(games: list) -> list:
 get_games_from_steam = compose(compact_steam_games_data, only_games, get_only_games_data, get_data, api_get_own_games)
 
 settings = load_configuration_file('settings.json')
-with open('steam_library.csv', 'w', newline='') as csvfile:
+with open('results/steam_library.csv', 'w', newline='') as csvfile:
     steam_game_keys = ['DRM', 'appid', 'name', 'play_time']
     writer = csv.DictWriter(csvfile, fieldnames=steam_game_keys)
     writer.writeheader()

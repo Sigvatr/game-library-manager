@@ -4,5 +4,8 @@
 # Settings file
 settings.json
 
-# cache directory
+# Cache directory
 .cache
+
+# Results directory
+results
