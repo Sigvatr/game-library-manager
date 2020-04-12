@@ -14,6 +14,27 @@ To use [Steam API](https://steamcommunity.com/dev) you will need **API Key**. Yo
 
 You alse needs the **Steam User ID**. The easiest way to find it, is look where *View profile* link leads (the number part of the URL). The other way are presented on page [How to Get Your Steam ID](https://www.wikihow.com/Get-Your-Steam-ID).
 
-### Downloading data
+### Downloading data from Steam
 
 We are going to use API method `GetOwnedGames` with `include_appinfo` paramater. It returns the whole collection of games, the name, time spend on title and achievements if game has them.
+
+## Epic Games
+
+Unfortunietly Epic doesn't have API for its game library. There is [Unoffical Epic Games Client](https://www.npmjs.com/package/epicgames-client), but it's not provide get all games. So, we need to improvise.
+
+### Downloading data from Epic Games
+
+The only way to get all games in Epic Store is on the Account [Transactions](https://www.epicgames.com/account/transactions) page. It is using query: `https://www.epicgames.com/account/v2/payment/ajaxGetOrderHistory?page=`.
+
+The respose is JSON:
+
+```json
+{
+    "count": 10,
+    "orders": [],
+    "start": 20,
+    "total": 93
+}
+```
+
+We will recived the collection list, but as JSON object. The page [JSON-CSV](https://json-csv.com/) can be usefull here.
