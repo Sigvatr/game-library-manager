@@ -38,3 +38,7 @@ The respose is JSON:
 ```
 
 We will recived the collection list, but as JSON object. The page [JSON-CSV](https://json-csv.com/) can be usefull here.
+
+## GOG
+
+There is a [API for GOG](https://gogapidocs.readthedocs.io/en/latest/index.html). But it's required loggin via [GOG page](https://login.gog.com/auth?). So also we need to use browser to run a script.
