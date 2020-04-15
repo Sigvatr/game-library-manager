@@ -42,3 +42,7 @@ We will recived the collection list, but as JSON object. The page [JSON-CSV](htt
 ## GOG
 
 There is a [API for GOG](https://gogapidocs.readthedocs.io/en/latest/index.html). But it's required loggin via [GOG page](https://login.gog.com/auth?). So also we need to use browser to run a script.
+
+## Uplay
+
+Unfortunetly there is not API for Uplay, the list of games is not presented in any form on Uplay web page, or support page. The only thing which can be obtain is the number of own games or last played.
